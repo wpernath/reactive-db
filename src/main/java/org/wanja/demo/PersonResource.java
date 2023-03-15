@@ -9,12 +9,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.runtime.ReactiveTransactional;
+import io.quarkus.logging.Log;
 import io.smallrye.mutiny.Uni;
 
 @Path("/persons")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 public class PersonResource {
     
     @GET
@@ -23,9 +23,15 @@ public class PersonResource {
     }
 
     @POST
-    @ReactiveTransactional
+    //@ReactiveTransactional
     public Uni<Person> createNew(Person p) {
-        return p.persist();
+        return Panache.withTransaction(p::persist)            
+            .onItem().ifNotNull().invoke(e -> {
+                Log.info(((Person )e).id);
+            })
+//            .transform(per -> Log.info("TRANS " + per))
+            .subscribe()
+            .with(per -> Log.info("SUB-WITH " + per));
     }
 
 
