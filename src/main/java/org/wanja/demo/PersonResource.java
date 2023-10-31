@@ -24,14 +24,11 @@ public class PersonResource {
 
     @POST
     //@ReactiveTransactional
-    public Uni<Person> createNew(Person p) {
-        return Panache.withTransaction(p::persist)            
+    public void createNew(Person p) {
+        Panache.withTransaction(Person::persist)            
             .onItem().ifNotNull().invoke(e -> {
                 Log.info(((Person )e).id);
-            })
-//            .transform(per -> Log.info("TRANS " + per))
-            .subscribe()
-            .with(per -> Log.info("SUB-WITH " + per));
+            });
     }
 
 
